@@ -282,7 +282,7 @@ ul.cloud {
 }
 
 ul.cloud a {
-  color: rgba(80, 80, 80, 0.938) !important;
+  color: rgba(80, 80, 80, 0.938) !important; /*#7bdcb5*/
   display: block !important;
   font-size: 1.5rem;
   padding: 0.125rem 0.25rem;
@@ -302,8 +302,13 @@ ul.cloud a[data-weight="9"] { --size: 9; font-weight: 900; }
 
 ul.cloud a {
   --size: 4;
-  font-size: calc(var(--size) * 0.30rem + 0.5rem);
+  font-size: calc(var(--size) * 1.2 * 0.30rem + 0.5rem);
   /* ... */
+}
+
+ul.cloud[data-show-value] a::after {
+  content: " (" attr(data-weight) ")";
+  font-size: 1rem;
 }
 
 ul.cloud li:nth-child(2n+1) a { --color: #181; }
@@ -332,4 +337,8 @@ ul.cloud a:hover::before {
 
 .badge-info{
   background-color: rgb(19, 168, 168);
+}
+
+#highl{
+  color:teal !important;
 }
