@@ -10,5 +10,11 @@
       "age": 22,
       "course": "Computer Science"
     }
+    ,
+    {
+      "name": "Vince Isaac",
+      "age": 19,
+      "course": "Data Science"
+    }
   ]
 }
