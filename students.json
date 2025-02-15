@@ -3,12 +3,12 @@
     {
       "name": "Alice Johnson",
       "age": 20,
-      "course": "Computer Science"
+      "course": "Information Technology"
     },
     {
       "name": "Bob Smith",
       "age": 22,
-      "course": "Data Science"
+      "course": "Computer Science"
     }
   ]
 }
