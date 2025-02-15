@@ -1,0 +1,14 @@
+{
+  "students": [
+    {
+      "name": "Alice Johnson",
+      "age": 20,
+      "course": "Computer Science"
+    },
+    {
+      "name": "Bob Smith",
+      "age": 22,
+      "course": "Data Science"
+    }
+  ]
+}
