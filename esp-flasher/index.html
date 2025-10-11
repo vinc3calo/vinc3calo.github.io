@@ -5,23 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ESP Student Firmware Flasher</title>
   <script type="module">
-    import { connect } from "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
+    import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
 
     document.addEventListener("DOMContentLoaded", () => {
-      const flashBtn = document.getElementById("flashBtn");
+        const flashBtn = document.getElementById("flashBtn");
 
-      flashBtn.addEventListener("click", async () => {
+        flashBtn.addEventListener("click", async () => {
         const model = document.getElementById("model").value;
         const manifestUrl = `manifests/${model}.json`;
 
-        try {
-          await connect({ manifest: manifestUrl });
-        } catch (e) {
-          alert("Error: " + e.message);
-        }
-      });
+        // Dynamically create the hidden ESP Web Tools element
+        const installer = document.createElement("esp-web-install-button");
+        installer.manifest = manifestUrl;
+        installer.style.display = "none";
+
+        document.body.appendChild(installer);
+
+        // Simulate user click
+        installer.click();
+        });
     });
-  </script>
+    </script>
+
   <style>
     body {
       font-family: system-ui, sans-serif;
