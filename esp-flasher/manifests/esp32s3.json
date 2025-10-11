@@ -1,0 +1,10 @@
+{
+  "name": "Student Firmware (ESP32-S3)",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [{ "path": "../firmware/firmware.bin", "offset": 4096 }]
+    }
+  ]
+}

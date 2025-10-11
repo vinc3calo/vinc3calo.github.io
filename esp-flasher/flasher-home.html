@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP Student Firmware Flasher</title>
+  <script type="module">
+    import { connect } from "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const flashBtn = document.getElementById("flashBtn");
+
+      flashBtn.addEventListener("click", async () => {
+        const model = document.getElementById("model").value;
+        const manifestUrl = `manifests/${model}.json`;
+
+        try {
+          await connect({ manifest: manifestUrl });
+        } catch (e) {
+          alert("Error: " + e.message);
+        }
+      });
+    });
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f6f7fb;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #333;
+    }
+    select, button {
+      font-size: 1rem;
+      padding: 0.5em 1em;
+      margin: 0.5em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #0078d7;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <h1>ESP Student Firmware Flasher</h1>
+  <p>Select your ESP model and flash the firmware.</p>
+
+  <select id="model">
+    <option value="esp32">ESP32</option>
+    <option value="esp8266">ESP8266</option>
+    <option value="esp32s2">ESP32-S2</option>
+    <option value="esp32s3">ESP32-S3</option>
+    <option value="esp32c3">ESP32-C3</option>
+  </select>
+
+  <br />
+  <button id="flashBtn">🔌 Connect & Flash</button>
+
+  <p style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+    Works in Chrome or Edge (desktop). Make sure your ESP device is connected via USB.
+  </p>
+</body>
+</html>
