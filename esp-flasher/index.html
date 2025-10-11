@@ -1,180 +1,110 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ESP Student Firmware Flasher — Show Port</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP Student Firmware Flasher</title>
   <script type="module">
-    // Load the official web component
     import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
 
     document.addEventListener("DOMContentLoaded", () => {
       const modelSelect = document.getElementById("model");
       const container = document.getElementById("install-container");
       const statusBox = document.getElementById("status");
-      const logBox = document.getElementById("log");
-      const portBox = document.getElementById("port");
 
-      // helper to append log lines
-      function appendLog(msg) {
-        logBox.textContent += msg + "\n";
-        logBox.scrollTop = logBox.scrollHeight;
-      }
-
-      // create installer for selected model
-      function createInstallerForModel(model) {
-        // clear previous
+      modelSelect.addEventListener("change", () => {
+        const model = modelSelect.value;
         container.innerHTML = "";
-        statusBox.textContent = "Preparing installer...";
-        portBox.textContent = "Port: not selected";
 
         if (!model) {
-          statusBox.textContent = "Waiting for model selection...";
+          statusBox.textContent = "Please select a device model.";
           return;
         }
 
         const manifestUrl = `manifests/${model}.json`;
-        statusBox.textContent = `Manifest selected: ${manifestUrl}`;
+        statusBox.textContent = `Using manifest: ${manifestUrl}`;
 
-        // create the web component
+        // Create the ESP Web Tools installer button
         const installer = document.createElement("esp-web-install-button");
         installer.manifest = manifestUrl;
+
+        // Basic styling hook
         installer.className = "installer";
-        // make the internal button visible to users (the component renders a button)
-        installer.style.display = "inline-block";
 
-        // events:
+        // Optional: show simple connection state
         installer.addEventListener("update", (e) => {
-          // e.detail.state examples: "idle", "connecting", "uploading", "done", "error"
-          const state = e.detail && e.detail.state ? e.detail.state : "unknown";
-          statusBox.textContent = `Status: ${state}`;
-          appendLog(`[status] ${state}`);
+          if (e.detail && e.detail.state) {
+            statusBox.textContent = "Status: " + e.detail.state;
+          }
         });
 
-        installer.addEventListener("log", (e) => {
-          // e.detail.message contains human readable logs
-          const msg = (e.detail && e.detail.message) ? e.detail.message : JSON.stringify(e.detail);
-          appendLog(`[log] ${msg}`);
-        });
-
-        // 'connected' event: device/port info available
-        installer.addEventListener("connected", (e) => {
-          // e.detail usually contains a 'device' or 'port' descriptor (implementation may vary)
-          const d = e.detail || {};
-          // try several fields for best compatibility
-          const portName = d.port || (d.device && d.device.productName) || (d.device && d.device.serialNumber) || (d.device && d.device.manufacturer) || JSON.stringify(d);
-          portBox.textContent = `Port: ${portName}`;
-          appendLog(`[connected] ${portName}`);
-        });
-
-        // 'disconnected' event: clear port
-        installer.addEventListener("disconnected", (e) => {
-          portBox.textContent = "Port: disconnected";
-          appendLog("[disconnected]");
-        });
-
-        // Place the installer element in the page for the user to interact with
         container.appendChild(installer);
-
-        // For debugging: if someone wants to programmatically click the button:
-        // installer.click(); // don't auto-click - wait for user to press
-      }
-
-      // initial state
-      createInstallerForModel(modelSelect.value);
-
-      // when the user picks a model, rebuild the installer
-      modelSelect.addEventListener("change", () => {
-        createInstallerForModel(modelSelect.value);
-      });
-
-      // convenience: expose a manual "clear logs" control
-      document.getElementById("clearLog").addEventListener("click", () => {
-        logBox.textContent = "";
       });
     });
   </script>
-
   <style>
-    :root{ --bg:#f5f7fb; --accent:#0078d7; --muted:#666; }
-    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin:0; padding:32px; background:var(--bg); color:#111}
-    .wrap{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;gap:12px}
-    h1{margin:0;font-size:1.25rem}
-    p.lead{color:var(--muted);margin:6px 0 18px 0}
-    .controls{display:flex;gap:12px;align-items:center;margin:14px 0}
-    select{padding:8px 12px;border-radius:8px;border:1px solid #d6dbe6}
-    #install-container{display:inline-block}
-    /* style internal button of the web component */
-    esp-web-install-button::part(button) {
-      background:var(--accent);
-      color:#fff;
-      border:none;
-      padding:10px 14px;
-      border-radius:8px;
-      cursor:pointer;
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f7f9fc;
+      text-align: center;
+      padding: 50px;
     }
-    esp-web-install-button::part(button):hover{ background:#005fa3; }
-
-    .panels{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-top:18px}
-    .card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(14,30,50,0.06)}
-    #log{background:#0b1220;color:#cfe9ff;font-family:monospace;font-size:13px;padding:10px;border-radius:6px;height:300px;overflow:auto;white-space:pre-wrap}
-    .meta{color:var(--muted);font-size:0.95rem}
-    .port{font-weight:600;margin-top:8px}
-    .smallbtn{background:#eee;border:0;padding:6px 10px;border-radius:6px;cursor:pointer}
-    footer{margin-top:18px;color:var(--muted);font-size:0.9rem}
-    @media (max-width:900px){ .panels{grid-template-columns:1fr} #log{height:180px} }
+    h1 {
+      color: #333;
+    }
+    select {
+      font-size: 1rem;
+      padding: 0.5em 1em;
+      margin: 0.5em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    #install-container {
+      margin-top: 20px;
+    }
+    esp-web-install-button::part(button) {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7em 1.2em;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    esp-web-install-button::part(button):hover {
+      background-color: #005fa3;
+    }
+    #status {
+      margin-top: 20px;
+      color: #333;
+      font-weight: 500;
+    }
+    footer {
+      margin-top: 30px;
+      color: #666;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#0078d7,#6c5ce7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">ESP</div>
-      <div>
-        <h1>ESP Student Firmware Flasher</h1>
-        <p class="lead">Select your device model and click the install button. Port & progress are shown below.</p>
-      </div>
-    </header>
+  <h1>ESP Student Firmware Flasher</h1>
+  <p>Select your ESP model, then click “Connect & Install.”</p>
 
-    <div class="controls">
-      <select id="model" aria-label="Select ESP model">
-        <option value="">-- Select Model --</option>
-        <option value="esp32">ESP32</option>
-        <option value="esp8266">ESP8266</option>
-        <option value="esp32s2">ESP32-S2</option>
-        <option value="esp32s3">ESP32-S3</option>
-        <option value="esp32c3">ESP32-C3</option>
-      </select>
+  <select id="model">
+    <option value="">-- Select Model --</option>
+    <option value="esp32">ESP32</option>
+    <option value="esp8266">ESP8266</option>
+    <option value="esp32s2">ESP32-S2</option>
+    <option value="esp32s3">ESP32-S3</option>
+    <option value="esp32c3">ESP32-C3</option>
+  </select>
 
-      <div id="install-container" title="Connect & Install UI will appear here"></div>
+  <div id="install-container"></div>
 
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <div class="meta" id="status">Waiting for model selection...</div>
-      </div>
-    </div>
+  <div id="status">Waiting for model selection...</div>
 
-    <div class="panels">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:700">Flashing Log</div>
-          <button id="clearLog" class="smallbtn">Clear</button>
-        </div>
-        <div id="log" aria-live="polite"></div>
-      </div>
-
-      <div class="card">
-        <div style="font-weight:700">Device / Port</div>
-        <div class="port" id="port">Port: not selected</div>
-        <div style="margin-top:10px;color:var(--muted);font-size:0.92rem">
-          If the browser does not show your device, make sure the ESP is plugged in, drivers are installed, and you are using Chrome/Edge (desktop).
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      <div style="color:#666">Hosted via GitHub Pages. Works in Chrome/Edge on desktop. Ensure the manifests and firmware paths are correct in <code>manifests/*.json</code>.</div>
-    </footer>
-  </div>
+  <footer>
+    Works in Chrome or Edge (desktop). Ensure your ESP is connected via USB.
+  </footer>
 </body>
 </html>
