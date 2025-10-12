@@ -13,12 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("install-container");
   const statusBox = document.getElementById("status");
 
-  // Map model + group to firmware file
+  // Only include the binaries you actually have
   const firmwareMap = {
     "ESP8266": {
       "1": "firmware/ESP8266-group1.bin",
       "2": "firmware/ESP8266-group2.bin"
     }
+    // Add more models/groups when you have binaries
   };
 
   function createInstaller() {
@@ -35,15 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const firmwareUrl = firmwareMap[model][group];
+    const firmwareUrl = firmwareMap[model]?.[group];
     if (!firmwareUrl) {
-      statusBox.textContent = "Firmware not found for this selection.";
+      statusBox.textContent = `Firmware not available for ${model} group ${group}`;
+      console.error("Firmware URL missing:", model, group);
       return;
     }
 
     statusBox.textContent = `Ready to flash: ${firmwareUrl}`;
 
-    // Build manifest object
     const manifestObj = {
       name: `${model.toUpperCase()} Group ${group} Firmware`,
       version: "1.0.0",
@@ -58,10 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ]
     };
 
-    // Create a Blob for the manifest
     const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/json" });
 
-    // Create installer button
     const installer = document.createElement("esp-web-install-button");
     installer.manifest = URL.createObjectURL(blob);
     installer.className = "installer";
@@ -100,19 +99,12 @@ footer { margin-top:30px; color:#666; font-size:0.9rem; }
 <select id="model">
   <option value="">-- Select Model --</option>
   <option value="ESP8266">ESP8266</option>
-  <option value="ESP32">ESP32</option>
-  <option value="ESP32S2">ESP32-S2</option>
-  <option value="ESP32S3">ESP32-S3</option>
-  <option value="ESP32C3">ESP32-C3</option>
 </select>
 
 <select id="group">
   <option value="">-- Select Group --</option>
   <option value="1">Group 1</option>
   <option value="2">Group 2</option>
-  <option value="3">Group 3</option>
-  <option value="4">Group 4</option>
-  <option value="5">Group 5</option>
 </select>
 
 <div id="install-container"></div>
