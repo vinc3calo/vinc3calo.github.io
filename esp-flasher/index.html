@@ -13,16 +13,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("install-container");
   const statusBox = document.getElementById("status");
 
-  // Map groups to MAC addresses
-  const groupMacMap = {
-    "1": "AA:BB:CC:11:11:01",
-    "2": "AA:BB:CC:11:11:02",
-    "3": "AA:BB:CC:11:11:03",
-    "4": "AA:BB:CC:11:11:04",
-    "5": "AA:BB:CC:11:11:05"
+  // Map model + group to firmware file
+  const firmwareMap = {
+    "ESP8266": {
+      "1": "firmware/ESP8266-group1.bin",
+      "2": "firmware/ESP8266-group2.bin",
+      "3": "firmware/ESP8266-group3.bin",
+      "4": "firmware/ESP8266-group4.bin",
+      "5": "firmware/ESP8266-group5.bin"
+    },
+    "ESP32": {
+      "1": "firmware/ESP32-group1.bin",
+      "2": "firmware/ESP32-group2.bin",
+      "3": "firmware/ESP32-group3.bin",
+      "4": "firmware/ESP32-group4.bin",
+      "5": "firmware/ESP32-group5.bin"
+    },
+    "ESP32S2": {
+      "1": "firmware/ESP32S2-group1.bin",
+      "2": "firmware/ESP32S2-group2.bin",
+      "3": "firmware/ESP32S2-group3.bin",
+      "4": "firmware/ESP32S2-group4.bin",
+      "5": "firmware/ESP32S2-group5.bin"
+    },
+    "ESP32S3": {
+      "1": "firmware/ESP32S3-group1.bin",
+      "2": "firmware/ESP32S3-group2.bin",
+      "3": "firmware/ESP32S3-group3.bin",
+      "4": "firmware/ESP32S3-group4.bin",
+      "5": "firmware/ESP32S3-group5.bin"
+    },
+    "ESP32C3": {
+      "1": "firmware/ESP32C3-group1.bin",
+      "2": "firmware/ESP32C3-group2.bin",
+      "3": "firmware/ESP32C3-group3.bin",
+      "4": "firmware/ESP32C3-group4.bin",
+      "5": "firmware/ESP32C3-group5.bin"
+    }
   };
 
-  async function createInstaller() {
+  function createInstaller() {
     const model = modelSelect.value;
     const group = groupSelect.value;
     container.innerHTML = "";
@@ -36,36 +66,36 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Use lowercase filenames for GitHub Pages
-    const manifestUrl = `manifests/${model.toLowerCase()}.json`;
-    statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
+    const firmwareUrl = firmwareMap[model][group];
+    if (!firmwareUrl) {
+      statusBox.textContent = "Firmware not found for this selection.";
+      return;
+    }
 
+    statusBox.textContent = `Ready to flash: ${firmwareUrl}`;
+
+    // Create installer button
     const installer = document.createElement("esp-web-install-button");
-    installer.manifest = manifestUrl;
+    installer.manifest = URL.createObjectURL(
+      new Blob([JSON.stringify({
+        name: `${model.toUpperCase()} Group ${group} Firmware`,
+        version: "1.0.0",
+        builds: [
+          {
+            chipFamily: model.toUpperCase(),
+            parts: [{
+              path: firmwareUrl,
+              offset: model.toLowerCase() === "esp8266" ? 0 : 4096
+            }]
+          }
+        ]
+      })], { type: "application/json" })
+    );
     installer.className = "installer";
 
-    // After flash is finished, write deviceName and MAC via Web Serial
-    installer.addEventListener("update", async (e) => {
+    installer.addEventListener("update", (e) => {
       if (e.detail && e.detail.state) {
         statusBox.textContent = `Status: ${e.detail.state}`;
-      }
-
-      if (e.detail && e.detail.state === "finished") {
-        const groupNumber = String(group).padStart(3,'0');
-        const deviceName = `${model.toUpperCase()}-${groupNumber}`;
-        const customMac = groupMacMap[group];
-
-        try {
-          // Send EEPROM write command if supported
-          if (installer.sendSerialCommand) {
-            const cmd = JSON.stringify({ deviceName, customMac });
-            await installer.sendSerialCommand(cmd);
-            statusBox.textContent += ` | EEPROM written: ${deviceName}`;
-          }
-        } catch (err) {
-          console.error("Failed to write EEPROM:", err);
-          statusBox.textContent += " | EEPROM write failed";
-        }
       }
     });
 
@@ -78,23 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
-body {
-  font-family: system-ui, sans-serif;
-  background:#f7f9fc;
-  text-align:center;
-  padding:50px;
-}
+body { font-family: system-ui, sans-serif; background:#f7f9fc; text-align:center; padding:50px; }
 h1 { color:#333; }
 select { font-size:1rem; padding:0.5em 1em; margin:0.5em; border-radius:8px; border:1px solid #ccc; }
 #install-container { margin-top:20px; }
 esp-web-install-button::part(button) {
-  background-color:#0078d7;
-  color:white;
-  border:none;
-  border-radius:8px;
-  padding:0.7em 1.2em;
-  cursor:pointer;
-  font-size:1rem;
+  background-color:#0078d7; color:white; border:none; border-radius:8px; padding:0.7em 1.2em; cursor:pointer; font-size:1rem;
 }
 esp-web-install-button::part(button):hover { background-color:#005fa3; }
 #status { margin-top:20px; color:#333; font-weight:500; }
@@ -107,11 +126,11 @@ footer { margin-top:30px; color:#666; font-size:0.9rem; }
 
 <select id="model">
   <option value="">-- Select Model --</option>
-  <option value="esp8266">ESP8266</option>
-  <option value="esp32">ESP32</option>
-  <option value="esp32s2">ESP32-S2</option>
-  <option value="esp32s3">ESP32-S3</option>
-  <option value="esp32c3">ESP32-C3</option>
+  <option value="ESP8266">ESP8266</option>
+  <option value="ESP32">ESP32</option>
+  <option value="ESP32S2">ESP32-S2</option>
+  <option value="ESP32S3">ESP32-S3</option>
+  <option value="ESP32C3">ESP32-C3</option>
 </select>
 
 <select id="group">
