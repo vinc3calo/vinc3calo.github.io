@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const manifestUrl = `manifests/${model}.json`;
+    const manifestUrl = `manifests/${model.toLowerCase()}.json`;
     statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
 
     const installer = document.createElement("esp-web-install-button");
