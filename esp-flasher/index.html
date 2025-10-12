@@ -39,30 +39,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const manifestUrl = `manifests/${model}.json`;
     statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
 
-    // Fetch manifest JSON
-    const resp = await fetch(manifestUrl);
-    let manifest = await resp.json();
-
-    // Device name = Model + 3-digit group number
-    const groupNumber = String(group).padStart(3, '0'); // "001", "002"
-    const deviceName = `${model.toUpperCase()}-${groupNumber}`;
-
-    // Inject buildArgs dynamically
-    manifest.buildArgs = manifest.buildArgs || {};
-    manifest.buildArgs.customMac = groupMacMap[group];
-    manifest.buildArgs.group = group;
-    manifest.buildArgs.deviceName = deviceName;
-
-    // Create installer button
     const installer = document.createElement("esp-web-install-button");
-    installer.manifest = URL.createObjectURL(
-      new Blob([JSON.stringify(manifest)], { type: "application/json" })
-    );
+    installer.manifest = manifestUrl;
     installer.className = "installer";
 
-    installer.addEventListener("update", (e) => {
+    // After flash is finished, write deviceName and MAC via Web Serial
+    installer.addEventListener("update", async (e) => {
       if (e.detail && e.detail.state) {
-        statusBox.textContent = `Status: ${e.detail.state} | Device: ${deviceName}`;
+        statusBox.textContent = `Status: ${e.detail.state}`;
+      }
+
+      if (e.detail && e.detail.state === "finished") {
+        const groupNumber = String(group).padStart(3,'0');
+        const deviceName = `${model.toUpperCase()}-${groupNumber}`;
+        const customMac = groupMacMap[group];
+
+        try {
+          // Web Serial write (ESP Web Tools supports sendSerialCommand)
+          if (installer.sendSerialCommand) {
+            const cmd = JSON.stringify({ deviceName, customMac });
+            await installer.sendSerialCommand(cmd);
+            statusBox.textContent += ` | EEPROM written: ${deviceName}`;
+          }
+        } catch (err) {
+          console.error("Failed to write EEPROM:", err);
+          statusBox.textContent += " | EEPROM write failed";
+        }
       }
     });
 
@@ -75,7 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
-body { font-family: system-ui, sans-serif; background:#f7f9fc; text-align:center; padding:50px; }
+body {
+  font-family: system-ui, sans-serif;
+  background:#f7f9fc;
+  text-align:center;
+  padding:50px;
+}
 h1 { color:#333; }
 select { font-size:1rem; padding:0.5em 1em; margin:0.5em; border-radius:8px; border:1px solid #ccc; }
 #install-container { margin-top:20px; }

@@ -1,11 +1,6 @@
 {
   "name": "Student Firmware (ESP32)",
   "version": "1.0.0",
-  "buildArgs": {
-    "customMac": "",
-    "group": "",
-    "deviceName": ""
-  },
   "builds": [
     {
       "chipFamily": "ESP32",
