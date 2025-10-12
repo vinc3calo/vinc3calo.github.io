@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "buildArgs": {
     "customMac": "",
-    "group": ""
+    "group": "",
+    "deviceName": ""
   },
   "builds": [
     {

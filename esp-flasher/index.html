@@ -1,142 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ESP Student Firmware Flasher</title>
-  <script type="module">
-    import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ESP Student Firmware Flasher</title>
+<script type="module">
+import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const modelSelect = document.getElementById("model");
-      const groupSelect = document.getElementById("group");
-      const container = document.getElementById("install-container");
-      const statusBox = document.getElementById("status");
+document.addEventListener("DOMContentLoaded", () => {
+  const modelSelect = document.getElementById("model");
+  const groupSelect = document.getElementById("group");
+  const container = document.getElementById("install-container");
+  const statusBox = document.getElementById("status");
 
-      // Map groups to MAC addresses
-      const groupMacMap = {
-        "1": "AA:BB:CC:11:11:01",
-        "2": "AA:BB:CC:11:11:02",
-        "3": "AA:BB:CC:11:11:03",
-        "4": "AA:BB:CC:11:11:04",
-        "5": "AA:BB:CC:11:11:05"
-      };
+  // Map groups to MAC addresses
+  const groupMacMap = {
+    "1": "AA:BB:CC:11:11:01",
+    "2": "AA:BB:CC:11:11:02",
+    "3": "AA:BB:CC:11:11:03",
+    "4": "AA:BB:CC:11:11:04",
+    "5": "AA:BB:CC:11:11:05"
+  };
 
-      function createInstaller() {
-        const model = modelSelect.value;
-        const group = groupSelect.value;
-        container.innerHTML = "";
+  async function createInstaller() {
+    const model = modelSelect.value;
+    const group = groupSelect.value;
+    container.innerHTML = "";
 
-        if (!model) {
-          statusBox.textContent = "Please select a device model.";
-          return;
-        }
-        if (!group) {
-          statusBox.textContent = "Please select a group.";
-          return;
-        }
+    if (!model) {
+      statusBox.textContent = "Please select a device model.";
+      return;
+    }
+    if (!group) {
+      statusBox.textContent = "Please select a group.";
+      return;
+    }
 
-        const manifestUrl = `manifests/${model}.json`;
-        statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
+    const manifestUrl = `manifests/${model}.json`;
+    statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
 
-        // Get MAC address for selected group
-        const macAddress = groupMacMap[group];
+    // Fetch manifest JSON
+    const resp = await fetch(manifestUrl);
+    let manifest = await resp.json();
 
-        // Create ESP Web Tools installer button
-        const installer = document.createElement("esp-web-install-button");
-        installer.manifest = manifestUrl;
+    // Device name = Model + 3-digit group number
+    const groupNumber = String(group).padStart(3, '0'); // "001", "002"
+    const deviceName = `${model.toUpperCase()}-${groupNumber}`;
 
-        // Pass custom arguments to firmware
-        installer.firmwareArguments = { customMac: macAddress, group: group };
+    // Inject buildArgs dynamically
+    manifest.buildArgs = manifest.buildArgs || {};
+    manifest.buildArgs.customMac = groupMacMap[group];
+    manifest.buildArgs.group = group;
+    manifest.buildArgs.deviceName = deviceName;
 
-        installer.className = "installer";
+    // Create installer button
+    const installer = document.createElement("esp-web-install-button");
+    installer.manifest = URL.createObjectURL(
+      new Blob([JSON.stringify(manifest)], { type: "application/json" })
+    );
+    installer.className = "installer";
 
-        installer.addEventListener("update", (e) => {
-          if (e.detail && e.detail.state) {
-            statusBox.textContent = "Status: " + e.detail.state;
-          }
-        });
-
-        container.appendChild(installer);
+    installer.addEventListener("update", (e) => {
+      if (e.detail && e.detail.state) {
+        statusBox.textContent = `Status: ${e.detail.state} | Device: ${deviceName}`;
       }
-
-      modelSelect.addEventListener("change", createInstaller);
-      groupSelect.addEventListener("change", createInstaller);
     });
-  </script>
 
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f7f9fc;
-      text-align: center;
-      padding: 50px;
-    }
-    h1 {
-      color: #333;
-    }
-    select {
-      font-size: 1rem;
-      padding: 0.5em 1em;
-      margin: 0.5em;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    #install-container {
-      margin-top: 20px;
-    }
-    esp-web-install-button::part(button) {
-      background-color: #0078d7;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.7em 1.2em;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    esp-web-install-button::part(button):hover {
-      background-color: #005fa3;
-    }
-    #status {
-      margin-top: 20px;
-      color: #333;
-      font-weight: 500;
-    }
-    footer {
-      margin-top: 30px;
-      color: #666;
-      font-size: 0.9rem;
-    }
-  </style>
+    container.appendChild(installer);
+  }
+
+  modelSelect.addEventListener("change", createInstaller);
+  groupSelect.addEventListener("change", createInstaller);
+});
+</script>
+
+<style>
+body { font-family: system-ui, sans-serif; background:#f7f9fc; text-align:center; padding:50px; }
+h1 { color:#333; }
+select { font-size:1rem; padding:0.5em 1em; margin:0.5em; border-radius:8px; border:1px solid #ccc; }
+#install-container { margin-top:20px; }
+esp-web-install-button::part(button) {
+  background-color:#0078d7; color:white; border:none; border-radius:8px; padding:0.7em 1.2em; cursor:pointer; font-size:1rem;
+}
+esp-web-install-button::part(button):hover { background-color:#005fa3; }
+#status { margin-top:20px; color:#333; font-weight:500; }
+footer { margin-top:30px; color:#666; font-size:0.9rem; }
+</style>
 </head>
 <body>
-  <h1>ESP Student Firmware Flasher</h1>
-  <p>Select your ESP model and group, then click “Connect & Install.”</p>
+<h1>ESP Student Firmware Flasher</h1>
+<p>Select your ESP model and group, then click “Connect & Install.”</p>
 
-  <select id="model">
-    <option value="">-- Select Model --</option>
-    <option value="esp32">ESP32</option>
-    <option value="esp8266">ESP8266</option>
-    <option value="esp32s2">ESP32-S2</option>
-    <option value="esp32s3">ESP32-S3</option>
-    <option value="esp32c3">ESP32-C3</option>
-  </select>
+<select id="model">
+  <option value="">-- Select Model --</option>
+  <option value="ESP8266">ESP8266</option>
+  <option value="ESP32">ESP32</option>
+  <option value="ESP32S2">ESP32-S2</option>
+  <option value="ESP32S3">ESP32-S3</option>
+  <option value="ESP32C3">ESP32-C3</option>
+</select>
 
-  <select id="group">
-    <option value="">-- Select Group --</option>
-    <option value="1">Group 1</option>
-    <option value="2">Group 2</option>
-    <option value="3">Group 3</option>
-    <option value="4">Group 4</option>
-    <option value="5">Group 5</option>
-  </select>
+<select id="group">
+  <option value="">-- Select Group --</option>
+  <option value="1">Group 1</option>
+  <option value="2">Group 2</option>
+  <option value="3">Group 3</option>
+  <option value="4">Group 4</option>
+  <option value="5">Group 5</option>
+</select>
 
-  <div id="install-container"></div>
+<div id="install-container"></div>
+<div id="status">Waiting for selection...</div>
 
-  <div id="status">Waiting for selection...</div>
-
-  <footer>
-    Works in Chrome or Edge (desktop). Ensure your ESP is connected via USB.
-  </footer>
+<footer>Works in Chrome or Edge (desktop). Ensure your ESP is connected via USB.</footer>
 </body>
 </html>
