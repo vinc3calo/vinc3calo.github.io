@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Only include the binaries you actually have
   const firmwareMap = {
     "ESP8266": {
-      "1": "firmware/ESP8266-group1.bin",
-      "2": "firmware/ESP8266-group2.bin"
+      "1": "./firmware/ESP8266-group1.bin",
+      "2": "./firmware/ESP8266-group2.bin"
     }
     // Add more models/groups when you have binaries
   };
@@ -52,12 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
         {
           chipFamily: model.toUpperCase(),
           parts: [{
-            path: firmwareUrl,
+            path: firmwareUrl,   // firmwareUrl now uses ./firmware/...
             offset: model.toLowerCase() === "esp8266" ? 0 : 4096
           }]
         }
       ]
     };
+
 
     const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/json" });
 
