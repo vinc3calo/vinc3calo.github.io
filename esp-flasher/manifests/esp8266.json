@@ -1,6 +1,10 @@
 {
   "name": "Student Firmware (ESP8266)",
   "version": "1.0.0",
+  "buildArgs": {
+    "customMac": "",
+    "group": ""
+  },
   "builds": [
     {
       "chipFamily": "ESP8266",

@@ -1,6 +1,10 @@
 {
   "name": "Student Firmware (ESP32-S3)",
   "version": "1.0.0",
+  "buildArgs": {
+    "customMac": "",
+    "group": ""
+  },
   "builds": [
     {
       "chipFamily": "ESP32-S3",
