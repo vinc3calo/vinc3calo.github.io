@@ -74,28 +74,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     statusBox.textContent = `Ready to flash: ${firmwareUrl}`;
 
+    // Build manifest object
+    const manifestObj = {
+      name: `${model.toUpperCase()} Group ${group} Firmware`,
+      version: "1.0.0",
+      builds: [
+        {
+          chipFamily: model.toUpperCase(),
+          parts: [{
+            path: firmwareUrl,
+            offset: model.toLowerCase() === "esp8266" ? 0 : 4096
+          }]
+        }
+      ]
+    };
+
+    // Create a Blob for the manifest
+    const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/json" });
+
     // Create installer button
     const installer = document.createElement("esp-web-install-button");
-    installer.manifest = URL.createObjectURL(
-      new Blob([JSON.stringify({
-        name: `${model.toUpperCase()} Group ${group} Firmware`,
-        version: "1.0.0",
-        builds: [
-          {
-            chipFamily: model.toUpperCase(),
-            parts: [{
-              path: firmwareUrl,
-              offset: model.toLowerCase() === "esp8266" ? 0 : 4096
-            }]
-          }
-        ]
-      })], { type: "application/json" })
-    );
+    installer.manifest = URL.createObjectURL(blob);
     installer.className = "installer";
 
     installer.addEventListener("update", (e) => {
       if (e.detail && e.detail.state) {
-        statusBox.textContent = `Status: ${e.detail.state}`;
+        statusBox.textContent = `Status: ${e.detail.state} | Device: ${model.toUpperCase()}-${group.padStart(3,"0")}`;
       }
     });
 
