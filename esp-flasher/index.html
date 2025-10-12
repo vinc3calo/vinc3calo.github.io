@@ -4,31 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ESP Student Firmware Flasher</title>
+
   <script type="module">
-    import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
+    import "/dist/web/install-button.js";
 
     document.addEventListener("DOMContentLoaded", () => {
       const modelSelect = document.getElementById("model");
+      const groupSelect = document.getElementById("group");
       const container = document.getElementById("install-container");
       const statusBox = document.getElementById("status");
 
-      modelSelect.addEventListener("change", () => {
+      // Map group number to MAC address
+      const groupMacMap = {
+        "1": "AA:BB:CC:11:11:01",
+        "2": "AA:BB:CC:11:11:02",
+        "3": "AA:BB:CC:11:11:03",
+        "4": "AA:BB:CC:11:11:04",
+        "5": "AA:BB:CC:11:11:05"
+      };
+
+      function createInstaller() {
         const model = modelSelect.value;
+        const group = groupSelect.value;
         container.innerHTML = "";
 
         if (!model) {
           statusBox.textContent = "Please select a device model.";
           return;
         }
+        if (!group) {
+          statusBox.textContent = "Please select a group.";
+          return;
+        }
 
         const manifestUrl = `manifests/${model}.json`;
-        statusBox.textContent = `Using manifest: ${manifestUrl}`;
+        statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
+
+        // Get MAC for selected group
+        const macAddress = groupMacMap[group];
 
         // Create the ESP Web Tools installer button
         const installer = document.createElement("esp-web-install-button");
         installer.manifest = manifestUrl;
 
-        // Basic styling hook
+        // Pass custom arguments to firmware
+        installer.firmwareArguments = { customMac: macAddress, group: group };
+
         installer.className = "installer";
 
         // Optional: show simple connection state
@@ -39,9 +60,14 @@
         });
 
         container.appendChild(installer);
-      });
+      }
+
+      // Event listeners
+      modelSelect.addEventListener("change", createInstaller);
+      groupSelect.addEventListener("change", createInstaller);
     });
   </script>
+
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -88,20 +114,35 @@
 </head>
 <body>
   <h1>ESP Student Firmware Flasher</h1>
-  <p>Select your ESP model, then click “Connect & Install.”</p>
+  <p>Select your ESP model and group, then click “Connect & Install.”</p>
 
-  <select id="model">
-    <option value="">-- Select Model --</option>
-    <option value="esp32">ESP32</option>
-    <option value="esp8266">ESP8266</option>
-    <option value="esp32s2">ESP32-S2</option>
-    <option value="esp32s3">ESP32-S3</option>
-    <option value="esp32c3">ESP32-C3</option>
-  </select>
+  <div>
+    <label for="model">Device Model:</label>
+    <select id="model">
+      <option value="">-- Select Model --</option>
+      <option value="esp32">ESP32</option>
+      <option value="esp8266">ESP8266</option>
+      <option value="esp32s2">ESP32-S2</option>
+      <option value="esp32s3">ESP32-S3</option>
+      <option value="esp32c3">ESP32-C3</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="group">Group:</label>
+    <select id="group">
+      <option value="">-- Select Group --</option>
+      <option value="1">Group 1</option>
+      <option value="2">Group 2</option>
+      <option value="3">Group 3</option>
+      <option value="4">Group 4</option>
+      <option value="5">Group 5</option>
+    </select>
+  </div>
 
   <div id="install-container"></div>
 
-  <div id="status">Waiting for model selection...</div>
+  <div id="status">Waiting for selection...</div>
 
   <footer>
     Works in Chrome or Edge (desktop). Ensure your ESP is connected via USB.
