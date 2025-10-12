@@ -1,0 +1,15 @@
+{
+  "name": "ESP8266 Group 2 Firmware",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "https://username.github.io/esp-flasher/firmware/ESP8266-group2.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

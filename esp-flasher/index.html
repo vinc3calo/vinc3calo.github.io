@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("install-container");
   const statusBox = document.getElementById("status");
 
-  // Only include the binaries you actually have
-  const firmwareMap = {
+  // Map each combination to its manifest URL
+  const manifestMap = {
     "ESP8266": {
-      "1": "firmware/ESP8266-group1.bin",
-      "2": "firmware/ESP8266-group2.bin"
+      "1": "manifests/ESP8266-group1.json",
+      "2": "manifests/ESP8266-group2.json"
     }
-    // Add more models/groups when you have binaries
+    // Add more later
   };
 
   function createInstaller() {
@@ -27,48 +27,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const group = groupSelect.value;
     container.innerHTML = "";
 
-    if (!model) {
-      statusBox.textContent = "Please select a device model.";
-      return;
-    }
-    if (!group) {
-      statusBox.textContent = "Please select a group.";
+    if (!model || !group) {
+      statusBox.textContent = "Please select both model and group.";
       return;
     }
 
-    const firmwareUrl = firmwareMap[model]?.[group];
-    if (!firmwareUrl) {
-      statusBox.textContent = `Firmware not available for ${model} group ${group}`;
-      console.error("Firmware URL missing:", model, group);
+    const manifestUrl = manifestMap[model]?.[group];
+    if (!manifestUrl) {
+      statusBox.textContent = "Firmware not available for this selection.";
       return;
     }
 
-    statusBox.textContent = `Ready to flash: ${firmwareUrl}`;
-
-    const manifestObj = {
-      name: `${model.toUpperCase()} Group ${group} Firmware`,
-      version: "1.0.0",
-      builds: [
-        {
-          chipFamily: model.toUpperCase(),
-          parts: [{
-            path: firmwareUrl,   // firmwareUrl now uses ./firmware/...
-            offset: model.toLowerCase() === "esp8266" ? 0 : 4096
-          }]
-        }
-      ]
-    };
-
-
-    const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/json" });
+    statusBox.textContent = `Ready to flash ${model} Group ${group}`;
 
     const installer = document.createElement("esp-web-install-button");
-    installer.manifest = URL.createObjectURL(blob);
+    installer.manifest = manifestUrl;
     installer.className = "installer";
 
     installer.addEventListener("update", (e) => {
       if (e.detail && e.detail.state) {
-        statusBox.textContent = `Status: ${e.detail.state} | Device: ${model.toUpperCase()}-${group.padStart(3,"0")}`;
+        statusBox.textContent = `Status: ${e.detail.state} | Device: ${model}-${group.padStart(3,"0")}`;
       }
     });
 
