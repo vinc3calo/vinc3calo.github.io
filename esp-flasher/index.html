@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Use lowercase filenames for GitHub Pages
     const manifestUrl = `manifests/${model.toLowerCase()}.json`;
     statusBox.textContent = `Using manifest: ${manifestUrl} | Group: ${group}`;
 
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const customMac = groupMacMap[group];
 
         try {
-          // Web Serial write (ESP Web Tools supports sendSerialCommand)
+          // Send EEPROM write command if supported
           if (installer.sendSerialCommand) {
             const cmd = JSON.stringify({ deviceName, customMac });
             await installer.sendSerialCommand(cmd);
@@ -87,7 +88,13 @@ h1 { color:#333; }
 select { font-size:1rem; padding:0.5em 1em; margin:0.5em; border-radius:8px; border:1px solid #ccc; }
 #install-container { margin-top:20px; }
 esp-web-install-button::part(button) {
-  background-color:#0078d7; color:white; border:none; border-radius:8px; padding:0.7em 1.2em; cursor:pointer; font-size:1rem;
+  background-color:#0078d7;
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:0.7em 1.2em;
+  cursor:pointer;
+  font-size:1rem;
 }
 esp-web-install-button::part(button):hover { background-color:#005fa3; }
 #status { margin-top:20px; color:#333; font-weight:500; }
@@ -100,11 +107,11 @@ footer { margin-top:30px; color:#666; font-size:0.9rem; }
 
 <select id="model">
   <option value="">-- Select Model --</option>
-  <option value="ESP8266">ESP8266</option>
-  <option value="ESP32">ESP32</option>
-  <option value="ESP32S2">ESP32-S2</option>
-  <option value="ESP32S3">ESP32-S3</option>
-  <option value="ESP32C3">ESP32-C3</option>
+  <option value="esp8266">ESP8266</option>
+  <option value="esp32">ESP32</option>
+  <option value="esp32s2">ESP32-S2</option>
+  <option value="esp32s3">ESP32-S3</option>
+  <option value="esp32c3">ESP32-C3</option>
 </select>
 
 <select id="group">
