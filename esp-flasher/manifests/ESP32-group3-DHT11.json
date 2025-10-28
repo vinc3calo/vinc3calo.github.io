@@ -1,0 +1,15 @@
+{
+  "name": "ESP32 Group 3 DHT11 Firmware",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "../firmware/ESP32-group3-DHT11.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

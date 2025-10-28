@@ -1,12 +1,12 @@
 {
-  "name": "ESP8266 Group 2 Firmware",
+  "name": "ESP8266 Group 5 DHT11 Firmware",
   "version": "1.0.0",
   "builds": [
     {
       "chipFamily": "ESP8266",
       "parts": [
         {
-          "path": "../firmware/ESP8266-group2.bin",
+          "path": "../firmware/ESP8266-group5-DHT11.bin",
           "offset": 0
         }
       ]

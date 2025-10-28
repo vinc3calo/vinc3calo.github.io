@@ -1,0 +1,15 @@
+{
+  "name": "ESP32 Group 3 DHT22 Firmware",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "../firmware/ESP32-group3-DHT22.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
