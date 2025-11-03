@@ -5,7 +5,7 @@
     {
       "chipFamily": "ESP32",
       "parts": [
-        { "path": "../firmware/bootloader_qio_40m.bin", "offset": 4096 },
+        { "path": "../firmware/bootloader_dio_40m.bin", "offset": 4096 },
         { "path": "../firmware/partitions.bin", "offset": 32768 },
         { "path": "../firmware/ESP32-group1-DHT11.bin", "offset": 65536 }
       ]
