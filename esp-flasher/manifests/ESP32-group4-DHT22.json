@@ -1,0 +1,14 @@
+{
+  "name": "ESP32 Group 4 DHT22 Firmware",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "../firmware/bootloader_dio_40m.bin", "offset": 4096 },
+        { "path": "../firmware/partitions.bin", "offset": 32768 },
+        { "path": "../firmware/ESP32-group4-DHT22.bin", "offset": 65536 }
+      ]
+    }
+  ]
+}

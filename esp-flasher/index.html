@@ -10,12 +10,17 @@ import "https://unpkg.com/esp-web-tools@9.3.0/dist/web/install-button.js";
 document.addEventListener("DOMContentLoaded", () => {
   const modelSelect = document.getElementById("model");
   const groupSelect = document.getElementById("group");
+  const sensorSelect = document.getElementById("sensor");
   const container = document.getElementById("install-container");
   const statusBox = document.getElementById("status");
 
-  // Map each combination to its manifest URL
+  // Map each combination to its manifest URL pattern
+  // The actual files should exist like:
+  // manifests/ESP8266-group1-DHT11.json
+  // manifests/ESP8266-group1-DHT22.json
   const manifestMap = {
     "ESP8266": {
+<<<<<<< HEAD
       "1": "manifests/ESP8266-group1.json",
       "2": "manifests/ESP8266-group2.json",
       "3": "manifests/ESP8266-group3.json",
@@ -28,27 +33,42 @@ document.addEventListener("DOMContentLoaded", () => {
       "3": "manifests/ESP32-group3.json",
       "4": "manifests/ESP32-group4.json",
       "5": "manifests/ESP32-group5.json"
+=======
+      "1": { "DHT11": "manifests/ESP8266-group1-DHT11.json", "DHT22": "manifests/ESP8266-group1-DHT22.json" },
+      "2": { "DHT11": "manifests/ESP8266-group2-DHT11.json", "DHT22": "manifests/ESP8266-group2-DHT22.json" },
+      "3": { "DHT11": "manifests/ESP8266-group3-DHT11.json", "DHT22": "manifests/ESP8266-group3-DHT22.json" },
+      "4": { "DHT11": "manifests/ESP8266-group4-DHT11.json", "DHT22": "manifests/ESP8266-group4-DHT22.json" },
+      "5": { "DHT11": "manifests/ESP8266-group5-DHT11.json", "DHT22": "manifests/ESP8266-group5-DHT22.json" }
+    },
+    "ESP32": {
+      "1": { "DHT11": "manifests/ESP32-group1-DHT11.json", "DHT22": "manifests/ESP32-group1-DHT22.json" },
+      "2": { "DHT11": "manifests/ESP32-group2-DHT11.json", "DHT22": "manifests/ESP32-group2-DHT22.json" },
+      "3": { "DHT11": "manifests/ESP32-group3-DHT11.json", "DHT22": "manifests/ESP32-group3-DHT22.json" },
+      "4": { "DHT11": "manifests/ESP32-group4-DHT11.json", "DHT22": "manifests/ESP32-group4-DHT22.json" },
+      "5": { "DHT11": "manifests/ESP32-group5-DHT11.json", "DHT22": "manifests/ESP32-group5-DHT22.json" }
+>>>>>>> e6ef2da6fe2b1f03ded541f57ad9786f8b3be920
     }
-    // Add more later
+    // Add more models later (ESP32, etc.)
   };
 
   function createInstaller() {
     const model = modelSelect.value;
     const group = groupSelect.value;
+    const sensor = sensorSelect.value;
     container.innerHTML = "";
 
-    if (!model || !group) {
-      statusBox.textContent = "Please select both model and group.";
+    if (!model || !group || !sensor) {
+      statusBox.textContent = "Please select model, group, and sensor.";
       return;
     }
 
-    const manifestUrl = manifestMap[model]?.[group];
+    const manifestUrl = manifestMap[model]?.[group]?.[sensor];
     if (!manifestUrl) {
       statusBox.textContent = "Firmware not available for this selection.";
       return;
     }
 
-    statusBox.textContent = `Ready to flash ${model} Group ${group}`;
+    statusBox.textContent = `Ready to flash ${model} Group ${group} (${sensor})`;
 
     const installer = document.createElement("esp-web-install-button");
     installer.manifest = manifestUrl;
@@ -56,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     installer.addEventListener("update", (e) => {
       if (e.detail && e.detail.state) {
-        statusBox.textContent = `Status: ${e.detail.state} | Device: ${model}-${group.padStart(3,"0")}`;
+        statusBox.textContent = `Status: ${e.detail.state} | Device: ${model}-${group.padStart(3,"0")} (${sensor})`;
       }
     });
 
@@ -65,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   modelSelect.addEventListener("change", createInstaller);
   groupSelect.addEventListener("change", createInstaller);
+  sensorSelect.addEventListener("change", createInstaller);
 });
 </script>
 
@@ -83,12 +104,16 @@ footer { margin-top:30px; color:#666; font-size:0.9rem; }
 </head>
 <body>
 <h1>ESP Student Firmware Flasher</h1>
-<p>Select your ESP model and group, then click “Connect & Install.”</p>
+<p>Select your ESP model, group, and DHT sensor, then click “Connect & Install.”</p>
 
 <select id="model">
   <option value="">-- Select Model --</option>
   <option value="ESP8266">ESP8266</option>
+<<<<<<< HEAD
   <option value="32">ESP8266</option>
+=======
+  <option value="ESP32">ESP32</option>
+>>>>>>> e6ef2da6fe2b1f03ded541f57ad9786f8b3be920
 </select>
 
 <select id="group">
@@ -98,6 +123,12 @@ footer { margin-top:30px; color:#666; font-size:0.9rem; }
   <option value="3">Group 3</option>
   <option value="4">Group 4</option>
   <option value="5">Group 5</option>
+</select>
+
+<select id="sensor">
+  <option value="">-- Select Sensor --</option>
+  <option value="DHT11">DHT11</option>
+  <option value="DHT22">DHT22</option>
 </select>
 
 <div id="install-container"></div>
